@@ -1,66 +1,157 @@
-# 🌟 WellTrack - Daily Mood Check-In Feature
+# WellTrack
 
-An AI-Assisted Non-Clinical Wellness Check-In Platform for Students
+A web-based wellness platform for tracking daily mood and emotional well-being.
 
-## 🚀 Quick Start
+---
 
-### 1. Install Dependencies
+### Local Setup
+
+**Prerequisites:**
+- Python 3.8+
+- pip
+
+**Steps:**
 ```bash
+# 1. Install dependencies
 cd backend
 pip install -r requirements.txt
+
+# 2. Run the application
+python3 app.py
+
+# 3. Open in browser
+# Visit http://localhost:5000
 ```
 
-### 2. Run Backend
+### Docker Compose
+**Prerequisites:**
+- Docker Desktop
+
+**Steps:**
 ```bash
-python app.py
+# Start the application
+docker-compose up --build
+
+# Access at http://localhost:5000
 ```
-Backend runs on `http://localhost:5000`
 
-### 3. Open Frontend
-Open `frontend/index.html` in your browser
+### Docker CLI
 
-## ✨ Current Features
+```bash
+# Build image
+docker build -t welltrack .
 
-- ✅ User Registration & Login (US-01)
-- ✅ Daily Mood Logging (US-02)
-- ✅ Mood History View
-- ✅ Secure Data Storage
+# Run container
+docker run -p 5000:5000 welltrack
 
-## 📖 Documentation
+# Access at http://localhost:5000
+```
 
-See `docs/SPRINT_1_DOCUMENTATION.md` for complete sprint documentation.
+---
 
-## 🧪 Quick Test
+## 📖 About
 
-1. Register a new account
-2. Login with your credentials
-3. Select a mood emoji (1-5 scale)
-4. Add optional tags and notes
-5. Click "Log Mood"
-6. View your mood history below
+WellTrack helps users track their daily emotional state through:
+- Secure user accounts
+- Daily mood logging with 5-point emoji scale
+- Optional tags and notes for reflection
+- Mood history tracking
+- One entry per day to encourage consistent habits
 
-## 🏗️ Project Structure
+---
+
+## 🏗️ Technical Overview
+
+**Stack:**
+- Backend: Flask (Python)
+- Frontend: HTML/CSS/JavaScript
+- Database: SQLite
+- Authentication: Token-based
+
+**API Endpoints:**
+- `POST /api/register` - Create account
+- `POST /api/login` - Authenticate
+- `POST /api/mood` - Log mood
+- `GET /api/mood/history` - Get history
+
+**Database:**
+```sql
+users: id, username, password_hash, token
+mood_entries: id, user_id, mood_level, mood_tags, notes, entry_date
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 welltrack/
 ├── backend/
 │   ├── app.py              # Flask API
-│   ├── requirements.txt    # Python dependencies
+│   ├── requirements.txt    # Dependencies
 │   └── welltrack.db        # SQLite database (auto-created)
 ├── frontend/
 │   └── index.html          # Web interface
-└── docs/
-    └── SPRINT_1_DOCUMENTATION.md
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
 ```
 
-## 📋 User Stories Implemented
+---
 
-- **US-01:** As a student, I want to create an account, so that my wellness data is stored securely.
-- **US-02:** As a student, I want to log my daily mood, so that I can track how I feel over time.
+## Usage
 
-## 🔜 Coming Soon
+1. **Register** - Create a new account
+2. **Login** - Sign in with credentials
+3. **Select mood** - Choose from 😢 😕 😐 🙂 😄
+4. **Add context** - Optional tags and notes
+5. **Log mood** - Save your entry
+6. **View history** - See past entries
 
-- Personal Reflection Journal (US-03)
-- AI Wellness Companion (US-04)
-- Mood Trends Visualization (US-06)
-- Wellness Resource Library (US-07)
+---
+
+## 🧪 Testing
+
+**Manual Testing:**
+1. Register account (username: `demo`, password: `test123`)
+2. Login and log a mood
+3. Try logging again (should show "already logged for today")
+4. Logout and login - data persists
+
+**Automated Testing:**
+```bash
+python test_api.py
+```
+
+**View Database:**
+```bash
+# Browser or curl
+http://localhost:5000/api/debug/db
+```
+---
+
+### US-01: User Account Creation (High Priority)
+- ✅ Secure registration with password hashing
+- ✅ Token-based authentication
+- ✅ Session persistence
+- ✅ Secure data storage
+
+### US-02: Daily Mood Logging (High Priority)
+- ✅ 5-point mood scale with emojis
+- ✅ Optional tags and notes
+- ✅ One entry per day enforcement
+- ✅ Mood history view
+- ✅ Real-time updates
+
+## ✨ Features Implemented
+- ✅ Secure user registration and login
+- ✅ Password hashing
+- ✅ Token-based authentication
+- ✅ Daily mood logging (1-5 scale)
+- ✅ Emoji-based mood selection
+- ✅ Optional tags and notes
+- ✅ Mood history view
+- ✅ One entry per day enforcement
+
+
+---

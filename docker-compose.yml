@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  welltrack:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - welltrack-data:/app
+    environment:
+      - FLASK_ENV=development
+    restart: unless-stopped
+
+volumes:
+  welltrack-data:

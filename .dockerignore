@@ -1,0 +1,9 @@
+*.db
+__pycache__
+*.pyc
+.git
+.gitignore
+docs/
+*.md
+test_api.py
+view_db.py

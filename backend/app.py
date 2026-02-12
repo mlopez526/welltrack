@@ -1,11 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime, date
 import sqlite3
 import hashlib
 import secrets
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
 
 DB_NAME = 'welltrack.db'
@@ -131,6 +132,10 @@ def get_mood_history():
         ]
     }), 200
 
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'index.html')
+
 @app.route('/api/debug/db', methods=['GET'])
 def debug_db():
     """Development only - view database contents"""
@@ -152,4 +157,4 @@ def debug_db():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
