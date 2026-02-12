@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WellTrack - Daily Mood Check-In</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; margin-bottom: 10px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 30px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        input, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        button { background: #3498db; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2980b9; }
+        .mood-selector { display: flex; justify-content: space-between; margin: 20px 0; }
+        .mood-btn { width: 18%; padding: 15px 5px; font-size: 24px; background: #ecf0f1; border: 2px solid #bdc3c7; cursor: pointer; }
+        .mood-btn.selected { border-color: #3498db; background: #d6eaf8; }
+        .error { color: #e74c3c; margin: 10px 0; }
+        .success { color: #27ae60; margin: 10px 0; }
+        .link { color: #3498db; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
+        .history { margin-top: 30px; }
+        .entry { background: #ecf0f1; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .entry-date { font-weight: bold; color: #2c3e50; }
+        .entry-mood { font-size: 20px; margin: 5px 0; }
+        .logout { background: #e74c3c; margin-top: 20px; }
+        .logout:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 WellTrack</h1>
+        <p class="subtitle">Your daily wellness companion</p>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="section active">
+            <h2>Login</h2>
+            <input type="text" id="loginUsername" placeholder="Username">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <div id="loginError" class="error"></div>
+            <span class="link" onclick="showRegister()">Don't have an account? Register</span>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="section">
+            <h2>Create Account</h2>
+            <input type="text" id="regUsername" placeholder="Username">
+            <input type="password" id="regPassword" placeholder="Password">
+            <button onclick="register()">Create Account</button>
+            <div id="regError" class="error"></div>
+            <div id="regSuccess" class="success"></div>
+            <span class="link" onclick="showLogin()">Already have an account? Login</span>
+        </div>
+
+        <!-- Mood Logging Section -->
+        <div id="moodSection" class="section">
+            <h2>How are you feeling today?</h2>
+            <p style="color: #7f8c8d; margin: 10px 0;">Select your mood level:</p>
+            <div class="mood-selector">
+                <div class="mood-btn" onclick="selectMood(1)">😢<br><small>Very Low</small></div>
+                <div class="mood-btn" onclick="selectMood(2)">😕<br><small>Low</small></div>
+                <div class="mood-btn" onclick="selectMood(3)">😐<br><small>Okay</small></div>
+                <div class="mood-btn" onclick="selectMood(4)">🙂<br><small>Good</small></div>
+                <div class="mood-btn" onclick="selectMood(5)">😄<br><small>Great</small></div>
+            </div>
+            <input type="text" id="moodTags" placeholder="Tags (e.g., stressed, tired, happy)">
+            <textarea id="moodNotes" rows="4" placeholder="Optional notes about your day..."></textarea>
+            <button onclick="logMood()">Log Mood</button>
+            <div id="moodError" class="error"></div>
+            <div id="moodSuccess" class="success"></div>
+
+            <div class="history">
+                <h3>Your Recent Moods</h3>
+                <div id="moodHistory"></div>
+            </div>
+
+            <button class="logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let token = localStorage.getItem('token');
+        let selectedMood = null;
+
+        if (token) {
+            showMoodSection();
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function showLogin() { showSection('loginSection'); }
+        function showRegister() { showSection('registerSection'); }
+        function showMoodSection() { 
+            showSection('moodSection'); 
+            loadMoodHistory();
+        }
+
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            
+            const response = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                document.getElementById('regSuccess').textContent = 'Account created! Please login.';
+                document.getElementById('regError').textContent = '';
+                setTimeout(showLogin, 1500);
+            } else {
+                document.getElementById('regError').textContent = data.error;
+                document.getElementById('regSuccess').textContent = '';
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                showMoodSection();
+            } else {
+                document.getElementById('loginError').textContent = data.error;
+            }
+        }
+
+        function selectMood(level) {
+            selectedMood = level;
+            document.querySelectorAll('.mood-btn').forEach((btn, idx) => {
+                btn.classList.toggle('selected', idx + 1 === level);
+            });
+        }
+
+        async function logMood() {
+            if (!selectedMood) {
+                document.getElementById('moodError').textContent = 'Please select a mood level';
+                return;
+            }
+
+            const response = await fetch(`${API_URL}/mood`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                body: JSON.stringify({
+                    mood_level: selectedMood,
+                    mood_tags: document.getElementById('moodTags').value,
+                    notes: document.getElementById('moodNotes').value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                document.getElementById('moodSuccess').textContent = 'Mood logged successfully!';
+                document.getElementById('moodError').textContent = '';
+                document.getElementById('moodTags').value = '';
+                document.getElementById('moodNotes').value = '';
+                selectedMood = null;
+                document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+                loadMoodHistory();
+            } else {
+                document.getElementById('moodError').textContent = data.error;
+                document.getElementById('moodSuccess').textContent = '';
+            }
+        }
+
+        async function loadMoodHistory() {
+            const response = await fetch(`${API_URL}/mood/history`, {
+                headers: { 'Authorization': token }
+            });
+            
+            const data = await response.json();
+            const historyDiv = document.getElementById('moodHistory');
+            
+            if (data.entries && data.entries.length > 0) {
+                historyDiv.innerHTML = data.entries.map(e => `
+                    <div class="entry">
+                        <div class="entry-date">${e.date}</div>
+                        <div class="entry-mood">Mood: ${getMoodEmoji(e.mood_level)} (${e.mood_level}/5)</div>
+                        ${e.mood_tags ? `<div>Tags: ${e.mood_tags}</div>` : ''}
+                        ${e.notes ? `<div>Notes: ${e.notes}</div>` : ''}
+                    </div>
+                `).join('');
+            } else {
+                historyDiv.innerHTML = '<p style="color: #7f8c8d;">No mood entries yet. Log your first mood!</p>';
+            }
+        }
+
+        function getMoodEmoji(level) {
+            const emojis = ['', '😢', '😕', '😐', '🙂', '😄'];
+            return emojis[level];
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            showLogin();
+        }
+    </script>
+</body>
+</html>
