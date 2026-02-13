@@ -2,14 +2,15 @@ import sqlite3
 
 DB_NAME = 'welltrack.db'
 
+
 def view_database():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    
+
     print("\n" + "="*60)
     print("WELLTRACK DATABASE VIEWER")
     print("="*60)
-    
+
     # View users
     print("\n📊 USERS TABLE:")
     print("-" * 60)
@@ -23,7 +24,7 @@ def view_database():
             print(f"{user[0]:<5} {user[1]:<20} {token_display:<35}")
     else:
         print("No users found.")
-    
+
     # View mood entries
     print("\n😊 MOOD ENTRIES TABLE:")
     print("-" * 60)
@@ -43,7 +44,7 @@ def view_database():
             print("-" * 60)
     else:
         print("No mood entries found.")
-    
+
     # Statistics
     print("\n📈 STATISTICS:")
     print("-" * 60)
@@ -54,8 +55,9 @@ def view_database():
     print(f"Total Users: {user_count}")
     print(f"Total Mood Entries: {mood_count}")
     print("="*60 + "\n")
-    
+
     conn.close()
+
 
 if __name__ == '__main__':
     view_database()
