@@ -4,69 +4,69 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                         FRONTEND                             │
-│                    (frontend/index.html)                     │
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   Register   │  │    Login     │  │  Mood Logger │     │
-│  │    Form      │  │     Form     │  │  Interface   │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-│                                                              │
-│  ┌────────────────────────────────────────────────────┐    │
-│  │           Mood History Display                      │    │
-│  └────────────────────────────────────────────────────┘    │
-│                                                              │
-└────────────────────────┬─────────────────────────────────────┘
+│                         FRONTEND                            │
+│                    (frontend/index.html)                    │
+│                                                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
+│  │   Register   │  │    Login     │  │  Mood Logger │       │
+│  │    Form      │  │     Form     │  │  Interface   │       │
+│  └──────────────┘  └──────────────┘  └──────────────┘       │
+│                                                             │
+│  ┌────────────────────────────────────────────────────┐     │
+│  │           Mood History Display                     │     │
+│  └────────────────────────────────────────────────────┘     │
+│                                                             │
+└────────────────────────┬────────────────────────────────────┘
                          │ HTTP/JSON
                          │ (CORS enabled)
                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      BACKEND API                             │
-│                    (backend/app.py)                          │
-│                      Flask Server                            │
-│                                                              │
+┌────────────────────────────────────────────────────────────┐
+│                      BACKEND API                           │
+│                    (backend/app.py)                        │
+│                      Flask Server                          │
+│                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │              API Endpoints                            │  │
-│  │                                                       │  │
-│  │  POST /api/register    - Create new user            │  │
-│  │  POST /api/login       - Authenticate user          │  │
-│  │  POST /api/mood        - Log daily mood             │  │
-│  │  GET  /api/mood/history - Get mood entries          │  │
+│  │              API Endpoints                           │  │
+│  │                                                      │  │
+│  │  POST /api/register     - Create new user            │  │
+│  │  POST /api/login        - Authenticate user          │  │
+│  │  POST /api/mood         - Log daily mood             │  │
+│  │  GET  /api/mood/history - Get mood entries           │  │
 │  └──────────────────────────────────────────────────────┘  │
-│                                                              │
+│                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │           Authentication Layer                        │  │
-│  │  - Password hashing (SHA-256)                        │  │
+│  │           Authentication Layer                       │  │
+│  │  - Password hashing (bcrypt)                         │  │
 │  │  - Token generation                                  │  │
 │  │  - Token validation                                  │  │
 │  └──────────────────────────────────────────────────────┘  │
-│                                                              │
-└────────────────────────┬─────────────────────────────────────┘
+│                                                            │
+└────────────────────────┬───────────────────────────────────┘
                          │ SQL Queries
                          ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       DATABASE                               │
-│                   (welltrack.db - SQLite)                    │
-│                                                              │
+┌────────────────────────────────────────────────────────────┐
+│                       DATABASE                             │
+│                   (welltrack.db - SQLite)                  │
+│                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │  users                                                │  │
+│  │  users                                               │  │
 │  │  ├─ id (PRIMARY KEY)                                 │  │
 │  │  ├─ username (UNIQUE)                                │  │
 │  │  ├─ password_hash                                    │  │
 │  │  └─ token                                            │  │
 │  └──────────────────────────────────────────────────────┘  │
-│                                                              │
+│                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │  mood_entries                                         │  │
+│  │  mood_entries                                        │  │
 │  │  ├─ id (PRIMARY KEY)                                 │  │
-│  │  ├─ user_id (FOREIGN KEY → users.id)                │  │
+│  │  ├─ user_id (FOREIGN KEY → users.id)                 │  │
 │  │  ├─ mood_level (1-5)                                 │  │
 │  │  ├─ mood_tags (TEXT)                                 │  │
 │  │  ├─ notes (TEXT)                                     │  │
-│  │  └─ entry_date (DATE, UNIQUE per user)              │  │
+│  │  └─ entry_date (DATE, UNIQUE per user)               │  │
 │  └──────────────────────────────────────────────────────┘  │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+│                                                            │
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -260,7 +260,7 @@ welltrack/
 │
 ├── backend/
 │   ├── app.py
-│   │   ├── Imports: flask, flask_cors, sqlite3, hashlib, secrets
+│   │   ├── Imports: flask, flask_cors, sqlite3, flask-bcrypt, secrets
 │   │   ├── Creates: welltrack.db (auto)
 │   │   └── Serves: API endpoints on port 5000
 │   │
@@ -284,7 +284,7 @@ welltrack/
 
 ```
 ┌─────────────────────────────────────────┐
-│           Frontend Stack                 │
+│           Frontend Stack                │
 ├─────────────────────────────────────────┤
 │  HTML5        - Structure               │
 │  CSS3         - Styling                 │
@@ -294,7 +294,7 @@ welltrack/
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
-│           Backend Stack                  │
+│           Backend Stack                 │
 ├─────────────────────────────────────────┤
 │  Python 3.8+  - Language                │
 │  Flask 3.0    - Web framework           │
@@ -305,7 +305,7 @@ welltrack/
 └─────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────┐
-│           Database Stack                 │
+│           Database Stack                │
 ├─────────────────────────────────────────┤
 │  SQLite 3     - Relational database     │
 │  File-based   - No server needed        │
@@ -321,24 +321,24 @@ welltrack/
 ┌────────────────────────────────────────────────┐
 │         Local Development Environment          │
 │                                                │
-│  ┌──────────────────────────────────────────┐ │
-│  │  Frontend: file:///path/to/index.html   │ │
-│  │  Port: N/A (file protocol)              │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Frontend: file:///path/to/index.html    │  │
+│  │  Port: N/A (file protocol)               │  │
+│  └──────────────────────────────────────────┘  │
 │                      │                         │
 │                      │ HTTP                    │
 │                      ▼                         │
-│  ┌──────────────────────────────────────────┐ │
-│  │  Backend: http://localhost:5000          │ │
-│  │  Process: python app.py                  │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Backend: http://localhost:5000          │  │
+│  │  Process: python app.py                  │  │
+│  └──────────────────────────────────────────┘  │
 │                      │                         │
 │                      │ SQL                     │
 │                      ▼                         │
-│  ┌──────────────────────────────────────────┐ │
-│  │  Database: ./welltrack.db                │ │
-│  │  File-based SQLite                       │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Database: ./welltrack.db                │  │
+│  │  File-based SQLite                       │  │
+│  └──────────────────────────────────────────┘  │
 │                                                │
 └────────────────────────────────────────────────┘
 ```
@@ -351,31 +351,31 @@ welltrack/
 ┌────────────────────────────────────────────────┐
 │              Production Environment            │
 │                                                │
-│  ┌──────────────────────────────────────────┐ │
-│  │  Frontend: Hosted on AWS S3/CloudFront   │ │
-│  │  HTTPS enabled                           │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Frontend: Hosted on AWS S3/CloudFront   │  │
+│  │  HTTPS enabled                           │  │
+│  └──────────────────────────────────────────┘  │
 │                      │                         │
 │                      │ HTTPS/REST              │
 │                      ▼                         │
-│  ┌──────────────────────────────────────────┐ │
-│  │  Backend: AWS Lambda + API Gateway       │ │
-│  │  or EC2 with Gunicorn                    │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Backend: AWS Lambda + API Gateway       │  │
+│  │  or EC2 with Gunicorn                    │  │
+│  └──────────────────────────────────────────┘  │
 │                      │                         │
 │                      │ SQL                     │
 │                      ▼                         │
-│  ┌──────────────────────────────────────────┐ │
-│  │  Database: AWS RDS (PostgreSQL)          │ │
-│  │  or DynamoDB                             │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  Database: AWS RDS (PostgreSQL)          │  │
+│  │  or DynamoDB                             │  │
+│  └──────────────────────────────────────────┘  │
 │                      │                         │
 │                      │ API Call                │
 │                      ▼                         │
-│  ┌──────────────────────────────────────────┐ │
-│  │  AI Service: AWS Bedrock / OpenAI API    │ │
-│  │  (for US-04: AI Wellness Companion)      │ │
-│  └──────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────┐  │
+│  │  AI Service: AWS Bedrock / OpenAI API    │  │
+│  │  (for US-04: AI Wellness Companion)      │  │
+│  └──────────────────────────────────────────┘  │
 │                                                │
 └────────────────────────────────────────────────┘
 ```
