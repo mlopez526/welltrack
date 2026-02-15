@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: welltrack
+    env: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: cd backend && python app.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0

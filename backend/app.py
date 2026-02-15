@@ -20,6 +20,10 @@ else:
     app.config["SECRET_KEY"] = os.environ["FLASK_SECRET_KEY"]
 DB_NAME = os.environ.get("DB_NAME", "welltrack.db")
 
+# Fix static folder path for Render deployment
+if not os.path.exists(app.static_folder):
+    app.static_folder = 'frontend'  # Render deployment
+
 
 bcrypt = Bcrypt(app)
 CORS(app)
@@ -166,7 +170,7 @@ def get_mood_history(user_id):
 @app.route('/')
 def index():
     assert app.static_folder is not None
-    return send_from_directory(app.static_folder, 'newindex.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/api/debug/db', methods=['GET'])
