@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WellTrack Dashboard</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.1/dist/markdown-it.min.js"></script> -->
     <style>
         * {
             margin: 0;
@@ -13,14 +14,37 @@
         }
         body {
             font-family: ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
-            background: #1c1f25;
-            color: white;
+            background: #f5f5f5;
+            color: black;
         }
         .header { padding: 10px 30px 30px 20px; display: flex; flex-direction: row; align-items: start; justify-content: space-between; gap: 15px; }
         .header h1 { font-weight: 100; padding: 0; }
         .header button { width: inherit; }
         .subtitle { color: #373b45; padding: 0 0 4px 10px; font-size: 14px; font-weight: 100;}
-        .content {
+
+        .nav {
+            display: flex;
+            background: rgb(176, 176, 176);
+            margin-bottom: 40px;
+            border-radius: 25px;
+            padding: 2px 2px;
+            box-shadow: inset 0 1px 2px rgb(83, 83, 83);
+        }
+        .nav div {
+            padding: 8px 14px;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #555;
+        }
+        .nav-active {
+            color: #000;
+            background: #f5f5f5;
+            border-radius: 20px;
+            box-shadow: 0 1px 2px rgb(83, 83, 83);
+        }
+
+        .container {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -30,58 +54,73 @@
             display: flex; flex-direction: column;
             justify-content: center;  align-items: center;
             gap: 10px;
-            padding: 20px;
+            padding: 0px;
         }
         .section h2 { font-weight: 100; margin-bottom: 10px; }
         .login {
             border-radius: 8px;
             padding: 20px;
             max-width: 400px;
-            margin: 150px auto 0 auto;
-            /* background: #2f333b; */
+            margin: 120px auto 0 auto;
         }
+        .logout { background: #e74c3c; }
+        .logout:hover { background: #c0392b; }
 
         .mg-10-top { margin-top: 10px; }
         input, textarea, button {
             width: 100%; padding: 12px;
-            border: 1px solid #afb4bb; border-radius: 20px;
+            border: 1px solid #afb4bb;
+            border-radius: 5px;
             font-size: 14px;
-            background: #1c1f25;
-            color: white;
+            background: #f5f5f5;
+            color: black;
         }
         button {
-            background: #afb4bb; color: #1b1e25;
+            background: #3498db; color: white;
             border: none; cursor: pointer; font-weight: bold;
         }
-        button:hover { background: #e1e1e1; }
+        button:hover { background: #2980b9; }
         .mood-selector { display: flex; justify-content: space-between; gap: 10px; margin: 20px 0; }
         .mood-btn { color: rgb(29, 31, 40); width: 100px; padding: 15px 15px; font-size: 40px;
-            border: 2px solid #ecf0f1; background: #ecf0f1; border-radius: 15px; cursor: pointer; }
+            border: 2px solid #afb4bb; background: #ecf0f1; border-radius: 5px; cursor: pointer; }
         .mood-btn small { font-size: 12px; color: rgb(29, 31, 40); }
         .mood-btn.selected { border-color: #3498db; background: #a1cceb; }
         .error { color: #e74c3c; margin: 10px 0; }
         .success { color: #27ae60; margin: 10px 0; }
         .link { color: #3498db; cursor: pointer; text-decoration: underline; margin-top: 15px; display: inline-block; }
 
-        .history { margin-top: 30px; }
+        .history { margin-top: 0px; }
         .mood-history { padding-top: 10px; }
-        .entry { border: 1px solid #ecf0f1; color: #afb4bb; padding: 15px; margin: 10px 0; border-radius: 10px; }
-        .entry-date { font-weight: bold; color: #6b7580; }
+        .entry {
+            background: #ecf0f1; border: 1px solid #afb4bb; color: #2c3e50;
+            padding: 15px; margin: 10px 0; border-radius: 5px;
+            min-width: 400px;
+        }
+        .entry-date { font-weight: bold; color: #2c3e50; }
         .entry-mood { font-size: 20px; margin: 5px 0; }
-        .logout:hover { background: #c0392b; }
+
+        .journal-entry {
+            width: 100%;
+            min-width: 600px;
+            border: 1px solid #afb4bb;
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 14px;
+            background: #f5f5f5;
+            color: black;
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="header">
             <h1>WellTrack<span class="subtitle">Your daily wellness companion</span></h1>
-            
 
             <button class="logout" @click="logout()" v-if="token!=null">Logout</button>
             <div v-else></div>
         </div>
-        <div class="container">
 
+        <div class="container">
             <!-- Login Section -->
             <div id="loginSection" class="section login" v-if="mode==MODE.login">
                 <h2>Login</h2>
@@ -103,8 +142,30 @@
                 <span class="link" @click="mode=MODE.login">Already have an account? Login</span>
             </div>
 
+            <div class="nav" v-if="mode >= MODE.mood">
+                <div :class="mode==MODE.mood ? 'nav-active' : ''" @click="mode=MODE.mood">Mood</div>
+                <div :class="mode==MODE.journal ? 'nav-active' : ''" @click="mode=MODE.journal">Journal</div>
+            </div>
+
+            <!-- Journaling Section -->
+            <div class="section" v-if="mode == MODE.journal">
+                <textarea class="journal-entry" v-model="journalEntry" rows="8" @change="renderEntry()"></textarea>
+                <button @click="logJournal()">Save</button>
+            </div>
+            <div class="section" v-if="mode == MODE.journal">
+                <div class="history" style="margin-top: 40px;">
+                    <h2>Your Recent Journal Entries</h2>
+                    <div class="mood-history">
+                        <div class="entry" v-if="journalList.length > 0" v-for="e in journalList" :key="e.id">
+                            <div class="entry-date">{{ e.date}}</div>
+                            <div>{{ e.journal_text}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Mood Logging Section -->
-            <div class="section" style="max-width: 600px; margin: 60px auto 0 auto" v-if="mode==MODE.mood && !hasEntryToday">
+            <div class="section" v-if="mode == MODE.mood && !hasEntryToday">
                 <h2>How are you feeling today?</h2>
                 <!-- <p style="color: #7f8c8d; margin: 10px 0;">Select your mood level:</p> -->
                 <div class="mood-selector">
@@ -142,11 +203,13 @@
 
     <script>
         const { createApp } = Vue;
+        // const md = window.markdownit();
 
         const MODE = Object.freeze({
             login: 1,
             registration: 2,
             mood: 3,
+            journal: 4
         });
 
         createApp({
@@ -154,13 +217,17 @@
                 return {
                     API_URL: '/api',
                     MODE: MODE,
+                    // md: md,
 
                     token: null,
                     mode: MODE.login,
+                    navOpen: false,
 
                     level: null,
                     moodTags: '',
                     moodNotes: '',
+
+                    journalEntry: '',
 
                     moodError: '',
                     moodSuccess: '',
@@ -170,6 +237,7 @@
 
                     hasEntryToday: false,
                     moodList: [],
+                    journalList: [],
                 }
             },
             mounted() {
@@ -179,9 +247,13 @@
                     this.token = storedToken;
                     this.mode = MODE.mood;
                     this.loadMoodHistory();
+                    this.loadJournalHistory();
                 }
             },
             methods: {
+                renderEntry() {
+                    this.journalRendered = md.render(this.journalEntry);
+                },
                 async login() {
                     const username = document.getElementById('loginUsername').value;
                     const password = document.getElementById('loginPassword').value;
@@ -227,6 +299,27 @@
                 },
                 selectMood(level) {
                     this.level = level;
+                },
+                async logJournal() {
+                    const response = await fetch(`${this.API_URL}/journal`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': this.token
+                        },
+                        body: JSON.stringify({
+                            journal_text: this.journalEntry,
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        this.journalEntry = '';
+                        this.loadJournalHistory();
+                    } else {
+                        // Handle error
+                    }
                 },
                 async logMood() {
                     if (!this.level) {
@@ -280,6 +373,26 @@
                         }
                     } else {
                         this.moodList = [];
+                    }
+                },
+                async loadJournalHistory() {
+                    const response = await fetch(`${this.API_URL}/journal/history`, {
+                        headers: { 'Authorization': this.token }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.entries && data.entries.length > 0) {
+                        this.journalList = data.entries;
+                        const todayStr = new Date().toLocaleDateString('en-CA');
+                        for (let entry of this.journalList) {
+                            if (entry.date == todayStr) {
+                                this.journalEntry = entry.journal_text;
+                                break;
+                            }
+                        }
+                    } else {
+                        this.journalList = [];
                     }
                 },
                 getMoodEmoji(level) {

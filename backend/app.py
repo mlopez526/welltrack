@@ -41,6 +41,12 @@ def init_db():
                   mood_tags TEXT, notes TEXT, entry_date DATE,
                     UNIQUE(user_id, entry_date),
                   FOREIGN KEY(user_id) REFERENCES users(id))''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS journal_entries
+                 (id INTEGER PRIMARY KEY, user_id INTEGER, journal_text TEXT,
+                    entry_date DATE,
+                    UNIQUE(user_id, entry_date),
+                  FOREIGN KEY(user_id) REFERENCES users(id))''')
     conn.commit()
     conn.close()
 
@@ -167,10 +173,70 @@ def get_mood_history(user_id):
     }), 200
 
 
+@app.route('/api/journal', methods=['POST'])
+@login_required
+def journal_entry(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    data = request.json
+    journal_text = data.get('journal_text', '')
+    entry_date = date.today().isoformat()
+
+    if not journal_text:
+        conn.close()
+        return jsonify({'error': 'Journal text is required'}), 400
+
+    # Get existing entry for the day
+    c.execute('''SELECT journal_text, entry_date
+                 FROM journal_entries WHERE user_id = ? and entry_date = ?''',
+              (user_id, entry_date))
+    entries = c.fetchall()
+    if entries:
+        # Update existing entry
+        c.execute('''
+            UPDATE journal_entries
+            SET journal_text = ?
+            WHERE user_id = ? AND entry_date = ?
+        ''', (journal_text, user_id, entry_date))
+        conn.commit()
+        conn.close()
+        return jsonify({'message': 'Journal entry updated successfully', 'date': entry_date}), 200
+    else:
+        c.execute('''
+            INSERT INTO journal_entries (user_id, journal_text, entry_date)
+            VALUES (?, ?, ?)
+        ''', (user_id, journal_text, entry_date))
+        conn.commit()
+        conn.close()
+        return jsonify({'message': 'Journal entry logged successfully', 'date': entry_date}), 201
+
+
+@app.route('/api/journal/history', methods=['GET'])
+@login_required
+def get_journal_history(user_id):
+
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+
+    c.execute('''SELECT journal_text, entry_date 
+                 FROM journal_entries WHERE user_id = ? ORDER BY entry_date DESC''',
+              (user_id,))
+    entries = c.fetchall()
+    conn.close()
+
+    return jsonify({
+        'entries': [
+            {'journal_text': e[0], 'date': e[1]}
+            for e in entries
+        ]
+    }), 200
+
+
 @app.route('/')
 def index():
     assert app.static_folder is not None
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(app.static_folder, 'newindex.html')
 
 
 @app.route('/api/debug/db', methods=['GET'])
