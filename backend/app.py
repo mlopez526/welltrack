@@ -239,24 +239,27 @@ def index():
     return send_from_directory(app.static_folder, 'newindex.html')
 
 
-@app.route('/api/debug/db', methods=['GET'])
-def debug_db():
-    """Development only - view database contents"""
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
+if os.environ.get("FLASK_ENV") != "production":
+    @app.route('/api/debug/db', methods=['GET'])
+    def debug_db():
+        """Development only - view database contents"""
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
 
-    c.execute('SELECT id, username FROM users')
-    users = [{'id': u[0], 'username': u[1]} for u in c.fetchall()]
+        c.execute('SELECT id, username FROM users')
+        users = [{'id': u[0], 'username': u[1]} for u in c.fetchall()]
 
-    c.execute('''SELECT m.id, u.username, m.mood_level, m.mood_tags, m.notes, m.entry_date 
-                 FROM mood_entries m 
-                 JOIN users u ON m.user_id = u.id 
-                 ORDER BY m.entry_date DESC''')
-    moods = [{'id': m[0], 'username': m[1], 'mood_level': m[2], 
-              'tags': m[3], 'notes': m[4], 'date': m[5]} for m in c.fetchall()]
+        c.execute('''SELECT m.id, u.username, m.mood_level, m.mood_tags, m.notes, m.entry_date 
+                    FROM mood_entries m
+                    JOIN users u ON m.user_id = u.id
+                    ORDER BY m.entry_date DESC''')
+        moods = [
+            {'id': m[0], 'username': m[1], 'mood_level': m[2], 'tags': m[3], 'notes': m[4], 'date': m[5]}
+            for m in c.fetchall()
+        ]
 
-    conn.close()
-    return jsonify({'users': users, 'mood_entries': moods}), 200
+        conn.close()
+        return jsonify({'users': users, 'mood_entries': moods}), 200
 
 
 if __name__ == '__main__':
