@@ -149,6 +149,13 @@ http://localhost:5000/api/debug/db
 - ✅ Mood history view
 - ✅ Real-time updates
 
+### US-03: Daily Journaling (High Priority)
+- ✅ Journal Entry
+- ✅ Journal history view
+
+### US-06: Daily Trend (Medium Priority)
+- ✅ Mood Trend view
+
 ## ✨ Features Implemented
 - ✅ Secure user registration and login
 - ✅ Password hashing
@@ -160,6 +167,7 @@ http://localhost:5000/api/debug/db
 - ✅ One entry per day enforcement
 - ✅ Journal Entry
 - ✅ Journal history view
+- ✅ Mood Trend view
 
 
 ---

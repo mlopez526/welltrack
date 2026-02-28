@@ -52,7 +52,7 @@
         }
         .section {
             display: flex; flex-direction: column;
-            justify-content: center;  align-items: center;
+            justify-content: center;  align-items: stretch;
             gap: 10px;
             padding: 0px;
         }
@@ -108,6 +108,45 @@
             font-size: 14px;
             background: #f5f5f5;
             color: black;
+        }
+
+        .chart {
+            height: 100px;
+            display: flex; flex-direction: column; justify-content: stretch; align-items: stretch;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        .char-grid {
+            z-index: -1;
+            display: flex; flex-direction: column; justify-content: stretch; align-items: stretch;
+        }
+        .chart-grid-line-label {
+            position: relative; bottom: -10px;left: -20px; font-size: 12px; color: #7f8c8d;
+        }
+        .chart-grid-line {
+            border-bottom: 1px solid #ccc;
+            color: #7f8c8d;
+            font-size: 12px;
+            height: 20px;
+            min-width: 100%;
+            padding: 0 5px;
+        }
+        .chart-area {
+            z-index: 99;
+            display: flex; flex-direction: row; justify-content: start; align-items: stretch;
+            position: relative; top: -45px; left: 0;
+            height: 120px;
+            width: 100%;
+        }
+        .chart-data-point {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100px; width: 40px; margin: 0 5px;
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        .chart-data-point-emoji {
+            position: relative; left: 0;
+            font-size: 24px;
         }
     </style>
 </head>
@@ -183,11 +222,23 @@
             </div>
 
             <div class="section" v-if="mode==MODE.mood">
+                <h2 v-if="hasEntryToday">Mood Trend</h2>
+                <div v-if="hasEntryToday" class="chart">
+                    <div class="chart-grid">
+                        <div class="chart-grid-line" v-for="(emoji, i) in EMOJIS" :key="i"><div class="chart-grid-line-label">{{ i==5 ? '' : 5-i}}</div></div>
+                    </div>
+                    <div class="chart-area">
+                        <div class="chart-data-point" v-for="e in moodList.slice(-15).sort((a, b) => new Date(a.date) - new Date(b.date))" :key="e.id">
+                            <div class="chart-data-point-emoji" :style="{ 'bottom': (e.mood_level * 20) + 'px' }">{{ getMoodEmoji(e.mood_level) }}</div>
+                            {{ e.date.slice(5, 10) }}
+                        </div>
+                    </div>
+                </div>
                 <div class="history">
                     <h2>Your Recent Moods</h2>
                     <div class="mood-history">
                         <div class="entry" v-if="moodList.length > 0" v-for="e in moodList" :key="e.id">
-                            <div class="entry-date">{{ e.date}}</div>
+                            <div class="entry-date">{{ e.date }}</div>
                             <div class="entry-mood">Mood: {{ getMoodEmoji(e.mood_level)}} ({{ e.mood_level}}/5)</div>
                             <div v-if="e.mood_tags">Tags: {{ e.mood_tags}}</div>
                             <div v-if="e.notes">Notes: {{ e.notes}}</div>
@@ -238,6 +289,8 @@
                     hasEntryToday: false,
                     moodList: [],
                     journalList: [],
+
+                    EMOJIS: ['', '😢', '😕', '😐', '🙂', '😄'],
                 }
             },
             mounted() {
@@ -360,7 +413,7 @@
                     });
 
                     const data = await response.json();
-                    
+
                     if (data.entries && data.entries.length > 0) {
                         this.moodList = data.entries;
                         // Check if date in entry matches today's date
@@ -396,9 +449,8 @@
                     }
                 },
                 getMoodEmoji(level) {
-                    if (level < 1 || level > 5) return '';
-                    const emojis = ['', '😢', '😕', '😐', '🙂', '😄'];
-                    return emojis[level];
+                    if (level < 1 || level > 5) return '';;
+                    return this.EMOJIS[level];
                 },
                 logout() {
                     localStorage.removeItem('token');
