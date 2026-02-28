@@ -73,11 +73,14 @@ WellTrack helps users track their daily emotional state through:
 - `POST /api/login` - Authenticate
 - `POST /api/mood` - Log mood
 - `GET /api/mood/history` - Get history
+- `POST /api/journal` - Create/Update journal entry
+- `GET /api/journal/history` - Get history
 
 **Database:**
 ```sql
 users: id, username, password_hash, token
 mood_entries: id, user_id, mood_level, mood_tags, notes, entry_date
+journal_entries: id, user_id, journal_text, entry_date
 ```
 
 ---
@@ -91,6 +94,7 @@ welltrack/
 │   ├── requirements.txt    # Dependencies
 │   └── welltrack.db        # SQLite database (auto-created)
 ├── frontend/
+│   ├── newindex.html       # SPA Web interface
 │   └── index.html          # Web interface
 ├── Dockerfile
 ├── docker-compose.yml
@@ -107,6 +111,8 @@ welltrack/
 4. **Add context** - Optional tags and notes
 5. **Log mood** - Save your entry
 6. **View history** - See past entries
+7. **Journal Entry** - Save your entry
+8. **View Journal history** - See past entries
 
 ---
 
@@ -152,6 +158,8 @@ http://localhost:5000/api/debug/db
 - ✅ Optional tags and notes
 - ✅ Mood history view
 - ✅ One entry per day enforcement
+- ✅ Journal Entry
+- ✅ Journal history view
 
 
 ---

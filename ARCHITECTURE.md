@@ -28,10 +28,12 @@
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │              API Endpoints                           │  │
 │  │                                                      │  │
-│  │  POST /api/register     - Create new user            │  │
-│  │  POST /api/login        - Authenticate user          │  │
-│  │  POST /api/mood         - Log daily mood             │  │
-│  │  GET  /api/mood/history - Get mood entries           │  │
+│  │  POST /api/register         - Create new user        │  │
+│  │  POST /api/login            - Authenticate user      │  │
+│  │  POST /api/mood             - Log daily mood         │  │
+│  │  GET  /api/mood/history     - Get mood entries       │  │
+│  │  POST /api/journal          - Create or Update entry │  │
+│  │  GET  /api/journal/history  - Get journal entries    │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                            │
 │  ┌──────────────────────────────────────────────────────┐  │
@@ -63,6 +65,13 @@
 │  │  ├─ mood_level (1-5)                                 │  │
 │  │  ├─ mood_tags (TEXT)                                 │  │
 │  │  ├─ notes (TEXT)                                     │  │
+│  │  └─ entry_date (DATE, UNIQUE per user)               │  │
+│  └──────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │  journal_entries                                     │  │
+│  │  ├─ id (PRIMARY KEY)                                 │  │
+│  │  ├─ user_id (FOREIGN KEY → users.id)                 │  │
+│  │  ├─ journal_text (TEXT)                              │  │
 │  │  └─ entry_date (DATE, UNIQUE per user)               │  │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                            │
@@ -164,6 +173,54 @@ User                Frontend              Backend              Database
  │                     │                     │                     │
 ```
 
+### 5. Journal Entry Flow
+
+```
+User                Frontend              Backend                 Database
+ │                     │                     │                        │
+ │  Select journal     │                     │                        │
+ │  Add tags/notes     │                     │                        │
+ ├────────────────────>│                     │                        │
+ │                     │  POST /api/journal  │                        │
+ │                     │  (with token)       │                        │
+ │                     ├────────────────────>│                        │
+ │                     │                     │  Validate token        │
+ │                     │                     ├───────────────────────>│
+ │                     │                     │<───────────────────────┤
+ │                     │                     │  UPSERT journal_entry  │
+ │                     │                     ├───────────────────────>│
+ │                     │                     │<───────────────────────┤
+ │                     │  Success response   │  Entry saved           │
+ │                     │<────────────────────┤                        │
+ │  "journal logged!"  │                     │                        │
+ │  Refresh history    │                     │                        │
+ │<────────────────────┤                     │                        │
+ │                     │                     │                        │
+```
+
+### 6. Journal History Retrieval Flow
+
+```
+User                Frontend              Backend                  Database
+ │                     │                     │                         │
+ │  View history       │                     │                         │
+ ├────────────────────>│                     │                         │
+ │                     │  GET /api/journal/history                     │
+ │                     │  (with token)       │                         │
+ │                     ├────────────────────>│                         │
+ │                     │                     │  Validate token         │
+ │                     │                     ├────────────────────────>│
+ │                     │                     │<────────────────────────┤
+ │                     │                     │  SELECT journal_entries │
+ │                     │                     ├────────────────────────>│
+ │                     │                     │<────────────────────────┤
+ │                     │  Entries array      │  Return results         │
+ │                     │<────────────────────┤                         │
+ │  Display entries    │                     │                         │
+ │<────────────────────┤                     │                         │
+ │                     │                     │                         │
+```
+
 ---
 
 ## Security Architecture
@@ -179,7 +236,7 @@ Layer 1: Frontend Validation
 └─ Automatic logout on invalid token
 
 Layer 2: Backend Authentication
-├─ Password hashing (SHA-256)
+├─ Password hashing (bcrypt)
 ├─ Token-based authentication
 ├─ Token validation on protected routes
 └─ User isolation (can only access own data)
@@ -268,6 +325,12 @@ welltrack/
 │       └── Specifies: Flask, flask-cors, requests
 │
 ├── frontend/
+│   └── newindex.html
+│       ├── Connects to: http://localhost:5000/api
+│       ├── Uses: localStorage for token
+│       └── Imports VueJS from CDN
+│
+├── frontend/
 │   └── index.html
 │       ├── Connects to: http://localhost:5000/api
 │       ├── Uses: localStorage for token
@@ -300,7 +363,7 @@ welltrack/
 │  Flask 3.0    - Web framework           │
 │  flask-cors   - CORS handling           │
 │  sqlite3      - Database driver         │
-│  hashlib      - Password hashing        │
+│  flask-bcrypt - Password hashing        │
 │  secrets      - Token generation        │
 └─────────────────────────────────────────┘
 
