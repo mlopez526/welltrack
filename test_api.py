@@ -61,6 +61,34 @@ def test_mood_history(token):
     return response.status_code == 200
 
 
+def test_journal_entry(token):
+    print("\n5. Testing Journal Entry...")
+    response = requests.post(
+        f"{BASE_URL}/journal",
+        headers={"Authorization": token},
+        json={
+            "journal_text": "Today was a productive day!"
+        }
+    )
+    print(f"   Status: {response.status_code}")
+    print(f"   Response: {response.json()}")
+    return response.status_code == 201
+
+
+def test_journal_history(token):
+    print("\n6. Testing Journal History...")
+    response = requests.get(
+        f"{BASE_URL}/journal/history",
+        headers={"Authorization": token}
+    )
+    print(f"   Status: {response.status_code}")
+    data = response.json()
+    print(f"   Entries found: {len(data.get('entries', []))}")
+    if data.get('entries'):
+        print(f"   Latest entry: {data['entries'][0]}")
+    return response.status_code == 200
+
+
 def run_tests():
     print("=" * 50)
     print("WellTrack API Test Suite")
@@ -83,6 +111,12 @@ def run_tests():
 
     # Test mood history
     test_mood_history(token)
+
+    # Test journal entry
+    test_journal_entry(token)
+
+    # Test journal history
+    test_journal_history(token)
 
     print("\n" + "=" * 50)
     print("✅ All tests completed!")
