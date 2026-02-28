@@ -188,7 +188,7 @@
 
             <!-- Journaling Section -->
             <div class="section" v-if="mode == MODE.journal">
-                <textarea class="journal-entry" v-model="journalEntry" rows="8" @change="renderEntry()"></textarea>
+                <textarea class="journal-entry" v-model="journalEntry" rows="8"></textarea>
                 <button @click="logJournal()">Save</button>
             </div>
             <div class="section" v-if="mode == MODE.journal">
@@ -304,9 +304,6 @@
                 }
             },
             methods: {
-                renderEntry() {
-                    this.journalRendered = md.render(this.journalEntry);
-                },
                 async login() {
                     const username = document.getElementById('loginUsername').value;
                     const password = document.getElementById('loginPassword').value;
@@ -324,6 +321,7 @@
                         localStorage.setItem('token', this.token);
                         this.mode = MODE.mood;
                         this.loadMoodHistory();
+                        this.loadJournalHistory();
                     } else {
                         this.loginError = data.error;
                     }
@@ -412,6 +410,12 @@
                         headers: { 'Authorization': this.token }
                     });
 
+                    if (response.status === 401) {
+                        // Token is invalid or expired, force logout
+                        this.logout();
+                        return;
+                    }
+
                     const data = await response.json();
 
                     if (data.entries && data.entries.length > 0) {
@@ -432,6 +436,12 @@
                     const response = await fetch(`${this.API_URL}/journal/history`, {
                         headers: { 'Authorization': this.token }
                     });
+
+                    if (response.status === 401) {
+                        // Token is invalid or expired, force logout
+                        this.logout();
+                        return;
+                    }
 
                     const data = await response.json();
                     
