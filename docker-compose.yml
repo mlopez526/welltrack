@@ -6,9 +6,10 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - welltrack-data:/app
+      - welltrack-data:/data
     environment:
       - FLASK_ENV=development
+      - DB_NAME=/data/welltrack.db
     restart: unless-stopped
 
 volumes:

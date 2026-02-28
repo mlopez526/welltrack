@@ -7,10 +7,11 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/app.py .
+COPY backend/seed_db.py .
 
 # Copy frontend files to the correct location
 RUN mkdir -p frontend
-COPY frontend/index.html ./frontend/
+COPY frontend/ ./frontend/
 
 # Expose port
 EXPOSE 5000

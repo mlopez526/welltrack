@@ -30,6 +30,7 @@ CORS(app)
 
 
 def init_db():
+    print("running init_db")
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users
@@ -49,6 +50,10 @@ def init_db():
                   FOREIGN KEY(user_id) REFERENCES users(id))''')
     conn.commit()
     conn.close()
+
+
+with app.app_context():
+    init_db()
 
 
 def hash_password(password):
@@ -263,5 +268,5 @@ if os.environ.get("FLASK_ENV") != "production":
 
 
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # init_db()
+    app.run(host='0.0.0.0', port=5000)

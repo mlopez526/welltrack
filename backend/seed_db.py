@@ -1,9 +1,12 @@
 """Script to seed database with initial data for testing"""
+import os
 import sqlite3
 from datetime import date, timedelta
 import random
 import bcrypt
-DB_NAME = 'welltrack.db'
+
+
+DB_NAME = os.environ.get("DB_NAME", "welltrack.db")
 
 
 def main():

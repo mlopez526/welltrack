@@ -1,6 +1,8 @@
+import os
 import sqlite3
 
-DB_NAME = 'welltrack.db'
+
+DB_NAME = os.environ.get("DB_NAME", "welltrack.db")
 
 
 def view_database():
@@ -28,9 +30,9 @@ def view_database():
     # View mood entries
     print("\n😊 MOOD ENTRIES TABLE:")
     print("-" * 60)
-    c.execute('''SELECT m.id, u.username, m.mood_level, m.mood_tags, m.notes, m.entry_date 
-                 FROM mood_entries m 
-                 JOIN users u ON m.user_id = u.id 
+    c.execute('''SELECT m.id, u.username, m.mood_level, m.mood_tags, m.notes, m.entry_date
+                 FROM mood_entries m
+                 JOIN users u ON m.user_id = u.id
                  ORDER BY m.entry_date DESC''')
     moods = c.fetchall()
     if moods:

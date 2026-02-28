@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  welltrack:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - welltrack-prod-data:/data
+    environment:
+      - FLASK_ENV=production
+      - FLASK_SECRET_KEY=${FLASK_SECRET_KEY}
+      - DB_NAME=/data/welltrack.db
+    restart: unless-stopped
+    command: ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+
+volumes:
+  welltrack-prod-data:

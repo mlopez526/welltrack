@@ -52,7 +52,7 @@ docker run -p 5000:5000 welltrack:latest
 docker run -d -p 5000:5000 --name welltrack-app welltrack:latest
 
 # Run with persistent data volume
-docker run -p 5000:5000 -v $(pwd)/data:/app/data welltrack:latest
+docker run -p 5000:5000 -v $(pwd)/data:/data -e DB_NAME=/data/welltrack.db welltrack:latest
 ```
 
 ### Manage Container
@@ -125,6 +125,8 @@ Once the container is running:
 - `POST http://localhost:5000/api/login`
 - `POST http://localhost:5000/api/mood`
 - `GET http://localhost:5000/api/mood/history`
+- `POST http://localhost:5000/api/journal`
+- `GET http://localhost:5000/api/journal/history`
 
 ---
 
@@ -208,6 +210,12 @@ HEALTHCHECK --interval=30s --timeout=3s \
 
 ---
 
+### Using Production Docker Compose File
+```bash
+docker-compose -f production-compose.yml up --build
+```
+
+
 ## Testing the Dockerized App
 
 ```bash
@@ -240,6 +248,7 @@ welltrack/
 │   └── requirements.txt   # Python dependencies
 └── frontend/
     └── index.html         # Web interface
+    └── newindex.html      # Web interface
 ```
 
 ---

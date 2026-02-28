@@ -98,6 +98,7 @@ welltrack/
 │   └── index.html          # Web interface
 ├── Dockerfile
 ├── docker-compose.yml
+├── production-compose.yml
 └── README.md
 ```
 
